@@ -1,4 +1,5 @@
-import { GameBoard, Mathler } from '../../components/Mathler';
+import { Mathler } from '@/components/Mathler';
+import { GameBoard } from '../../components/Mathler.types';
 import MathlerContainer from './MathlerContainer';
 
 async function validateGameBoard(board: GameBoard): Promise<GameBoard> {

@@ -1,4 +1,4 @@
-import { GuessSpotState, Square } from '../../components/Mathler';
+import { GuessSpotState, Square } from '../../components/Mathler.types';
 
 type MathlerSquareProps = Square & {};
 

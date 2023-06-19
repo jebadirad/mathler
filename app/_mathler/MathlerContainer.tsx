@@ -2,11 +2,8 @@
 
 import { useTransition, useState, useCallback, useEffect } from 'react';
 import { evaluate } from 'mathjs';
-import {
-  GameBoard,
-  initialGameBoard,
-  isValidValue,
-} from '../../components/Mathler';
+import { initialGameBoard } from '../../components/Mathler';
+import { GameBoard, isValidValue } from '../../components/Mathler.types';
 import MathlerRow from './MathlerRow';
 import ButtonInputs from './ButtonInputs';
 import ErrorBanner from './ErrorBanner';
@@ -49,7 +46,7 @@ export default function MathlerContainer({
       setErrorMessage(`Invalid expression`);
       setErrorTransitionState('in');
     }
-  }, []);
+  }, [gameState, handleSubmit, todaysAnswer]);
 
   const handleDeleteClick = useCallback(() => {
     const row = gameState.board[gameState.currentIndex];
@@ -78,6 +75,9 @@ export default function MathlerContainer({
 
   useEffect(() => {
     const docEventListener = (ev: Event) => {
+      if (gameState.isGameOver) {
+        return;
+      }
       if ('key' in ev && typeof ev.key === 'string') {
         if (isValidValue(ev.key)) {
           handleButtonClick(ev.key);

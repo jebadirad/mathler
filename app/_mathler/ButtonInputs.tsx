@@ -3,7 +3,7 @@ import {
   GuessSpotState,
   numberInputs,
   operatorInputs,
-} from '../../components/Mathler';
+} from '../../components/Mathler.types';
 
 type ButtonInputsProps = {
   onInputClick: (val: string) => void;

@@ -1,4 +1,4 @@
-import { Row } from '../../components/Mathler';
+import { Row } from '../../components/Mathler.types';
 import MathlerSquare from './MathlerSquare';
 
 type MathlerRowProps = {

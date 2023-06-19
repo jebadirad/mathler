@@ -1,21 +1,13 @@
 import { evaluate } from 'mathjs';
 import * as _ from 'lodash';
 import answers from './MathlerAnswers';
-
-export type GameBoard = {
-  board: Array<Row>;
-  currentIndex: number;
-  isGameOver: boolean;
-  buttonInputs: {
-    [key in Operator | NumberValue]: GuessSpotState;
-  };
-};
-export enum GuessSpotState {
-  Correct,
-  Wrong,
-  ValueOnly,
-  Empty,
-}
+import {
+  GameBoard,
+  GuessSpotState,
+  NumberValue,
+  Operator,
+  isValidValue,
+} from './Mathler.types';
 
 export const initialGameBoard: GameBoard = {
   board: [
@@ -196,48 +188,6 @@ export const initialGameBoard: GameBoard = {
   },
 };
 
-export type Row = Array<Square>;
-export const numberInputs = [
-  '0',
-  '1',
-  '2',
-  '3',
-  '4',
-  '5',
-  '6',
-  '7',
-  '8',
-  '9',
-] as const;
-export const operatorInputs = ['+', '-', '/', '*'] as const;
-
-export const isValidValue = (val: string): val is Operator | NumberValue => {
-  if (
-    numberInputs.findIndex((i) => i === val) > -1 ||
-    operatorInputs.findIndex((i) => i === val) > -1
-  ) {
-    return true;
-  }
-
-  return false;
-};
-export type Operator = '+' | '-' | '/' | '*';
-export type NumberValue =
-  | '0'
-  | '1'
-  | '2'
-  | '3'
-  | '4'
-  | '5'
-  | '6'
-  | '7'
-  | '8'
-  | '9';
-export type Square = {
-  value: Operator | NumberValue | null;
-  guessState: GuessSpotState;
-};
-
 export class Mathler {
   static validateGameBoard(board: GameBoard): GameBoard {
     const gb = board;
@@ -314,35 +264,6 @@ export class Mathler {
                   gb.buttonInputs[rowVal] = GuessSpotState.Correct;
                 }
               });
-            } else if (intersect.length === 0) {
-              if (
-                val.length === submittedValue.length ||
-                val.length > submittedValue.length
-              ) {
-                submittedValue.forEach((v) => {
-                  row[v].guessState = GuessSpotState.ValueOnly;
-                  const rowVal = row[v].value;
-                  if (rowVal) {
-                    gb.buttonInputs[rowVal] = GuessSpotState.ValueOnly;
-                  }
-                });
-              } else {
-                submittedValue.forEach((v, i) => {
-                  if (i > val.length - 1) {
-                    row[v].guessState = GuessSpotState.Wrong;
-                    const rowVal = row[v].value;
-                    if (rowVal) {
-                      gb.buttonInputs[rowVal] = GuessSpotState.Wrong;
-                    }
-                  } else {
-                    row[v].guessState = GuessSpotState.ValueOnly;
-                    const rowVal = row[v].value;
-                    if (rowVal) {
-                      gb.buttonInputs[rowVal] = GuessSpotState.Wrong;
-                    }
-                  }
-                });
-              }
             } else {
               intersect.forEach((v) => {
                 row[v].guessState = GuessSpotState.Correct;
@@ -434,16 +355,23 @@ export class Mathler {
     answer: number | null;
     isValid: boolean;
   } {
-    const validated = evaluate(exp);
-    if (typeof validated === 'number') {
+    try {
+      const validated = evaluate(exp);
+      if (typeof validated === 'number') {
+        return {
+          answer: validated,
+          isValid: true,
+        };
+      }
       return {
-        answer: validated,
-        isValid: true,
+        answer: null,
+        isValid: false,
+      };
+    } catch (e) {
+      return {
+        answer: null,
+        isValid: false,
       };
     }
-    return {
-      answer: null,
-      isValid: false,
-    };
   }
 }
