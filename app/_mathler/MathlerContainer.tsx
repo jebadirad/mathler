@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition, useState, useCallback } from 'react';
+import { useTransition, useState, useCallback, useEffect } from 'react';
 import { evaluate } from 'mathjs';
 import {
   GameBoard,
@@ -26,7 +26,7 @@ export default function MathlerContainer({
     'out' | 'in' | null
   >(null);
 
-  const submitAction = () => {
+  const submitAction = useCallback(() => {
     try {
       const expression = gameState.board[gameState.currentIndex]
         .map((item) => item.value)
@@ -49,7 +49,7 @@ export default function MathlerContainer({
       setErrorMessage(`Invalid expression`);
       setErrorTransitionState('in');
     }
-  };
+  }, []);
 
   const handleDeleteClick = useCallback(() => {
     const row = gameState.board[gameState.currentIndex];
@@ -75,6 +75,27 @@ export default function MathlerContainer({
     },
     [gameState]
   );
+
+  useEffect(() => {
+    const docEventListener = (ev: Event) => {
+      if ('key' in ev && typeof ev.key === 'string') {
+        if (isValidValue(ev.key)) {
+          handleButtonClick(ev.key);
+        }
+        if (ev.key === 'Backspace' || ev.key === 'Delete') {
+          handleDeleteClick();
+        }
+        if (ev.key === 'Enter') {
+          submitAction();
+        }
+      }
+    };
+    document.addEventListener('keydown', docEventListener, false);
+
+    return () => {
+      document.removeEventListener('keydown', docEventListener, false);
+    };
+  }, [handleButtonClick, handleDeleteClick, submitAction]);
 
   return (
     <div>

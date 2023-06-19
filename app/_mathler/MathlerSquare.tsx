@@ -31,7 +31,7 @@ export default function MathlerSquare({
   }
   return (
     <div
-      className={`border-black border-2 w-14 h-10 flex justify-center items-center ${successStateClass}`}
+      className={`border-base-content border-2 w-14 h-10 flex justify-center items-center ${successStateClass}`}
     >
       <span className="">{value === null ? '' : value}</span>
     </div>

@@ -1,6 +1,3 @@
-'use client';
-
-import { useMemo } from 'react';
 import {
   GameBoard,
   GuessSpotState,
@@ -44,41 +41,11 @@ export default function ButtonInputs({
   board,
   isGameOver,
 }: ButtonInputsProps) {
-  const reducedBoard = useMemo(
-    () =>
-      board.board.reduce<Record<string, GuessSpotState>>((acc, row) => {
-        const prev = acc;
-        const rowReduce = row.reduce<Record<string, GuessSpotState>>(
-          (rowAcc, square) => {
-            if (square.value) {
-              return { ...rowAcc, [square.value]: square.guessState };
-            }
-            return rowAcc;
-          },
-          {}
-        );
-        Object.entries(rowReduce).forEach(([key, val]) => {
-          if (prev[key] === GuessSpotState.Wrong) {
-            prev[key] = GuessSpotState.Wrong;
-          } else if (prev[key] === GuessSpotState.Correct) {
-            prev[key] = GuessSpotState.Correct;
-          } else if (
-            prev[key] === GuessSpotState.ValueOnly ||
-            prev[key] === GuessSpotState.Empty
-          ) {
-            prev[key] = val;
-          }
-        });
-        return { ...prev, ...rowReduce };
-      }, {}),
-    [board.board]
-  );
-
   return (
     <div className="flex gap-2 flex-col">
       <div className="flex flex-wrap justify-between">
         {numberInputs.map((val, i) => {
-          const buttonUsed = reducedBoard[val];
+          const buttonUsed = board.buttonInputs[val];
           let buttonUsedClass = 'btn-outline btn-secondary';
           if (typeof buttonUsed !== 'undefined') {
             buttonUsedClass = buttonGuessStateToClassName(buttonUsed);
@@ -112,7 +79,7 @@ export default function ButtonInputs({
           Submit
         </button>
         {operatorInputs.map((val, i) => {
-          const buttonUsed = reducedBoard[val];
+          const buttonUsed = board.buttonInputs[val];
 
           let buttonUsedClass = 'btn-outline btn-secondary';
           if (typeof buttonUsed !== 'undefined') {
