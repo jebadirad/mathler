@@ -35,7 +35,7 @@ export default function MathlerSquare({
       data-testid={index}
       className={`border-base-content border-2 w-14 h-10 flex justify-center items-center ${successStateClass}`}
     >
-      <span>{value === null ? '' : value}</span>
+      <span>{value}</span>
     </div>
   );
 }

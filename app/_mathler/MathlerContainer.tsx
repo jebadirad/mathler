@@ -28,11 +28,13 @@ export default function MathlerContainer({
       const expression = gameState.board[gameState.currentIndex]
         .map((item) => item.value)
         .join('');
-      const answer = evaluate(expression);
       if (expression.length < 6) {
         setErrorMessage('All 6 entires must be filled out');
         setErrorTransitionState('in');
-      } else if (answer === todaysAnswer) {
+        return;
+      }
+      const answer = evaluate(expression);
+      if (answer === todaysAnswer) {
         startTransition(async () => {
           const gameboard = await handleSubmit(gameState);
           setGameState(gameboard);

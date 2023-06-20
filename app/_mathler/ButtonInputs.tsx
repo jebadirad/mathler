@@ -34,6 +34,33 @@ const buttonGuessStateToClassName = (name: GuessSpotState): string => {
   }
 };
 
+function ButtonInput({
+  buttonUsed,
+  isGameOver,
+  onInputClick,
+  val,
+}: {
+  buttonUsed: GuessSpotState | undefined;
+  isGameOver: boolean;
+  onInputClick: ButtonInputsProps['onInputClick'];
+  val: string;
+}) {
+  let buttonUsedClass = 'btn-outline btn-secondary';
+  if (typeof buttonUsed !== 'undefined') {
+    buttonUsedClass = buttonGuessStateToClassName(buttonUsed);
+  }
+  return (
+    <button
+      className={isGameOver ? 'btn btn-disabled' : `btn ${buttonUsedClass}`}
+      type="button"
+      disabled={isGameOver}
+      onClick={() => onInputClick(val)}
+    >
+      {val}
+    </button>
+  );
+}
+
 export default function ButtonInputs({
   onInputClick,
   onSubmitClick,
@@ -44,28 +71,17 @@ export default function ButtonInputs({
   return (
     <div className="flex gap-2 flex-col">
       <div className="flex flex-wrap justify-between">
-        {numberInputs.map((val, i) => {
-          const buttonUsed = board.buttonInputs[val];
-          let buttonUsedClass = 'btn-outline btn-secondary';
-          if (typeof buttonUsed !== 'undefined') {
-            buttonUsedClass = buttonGuessStateToClassName(buttonUsed);
-          }
-          return (
-            <button
-              className={
-                isGameOver ? 'btn btn-disabled' : `btn ${buttonUsedClass}`
-              }
-              type="button"
-              disabled={isGameOver}
-              // justification, input array is fixed and never changes.
-              // eslint-disable-next-line react/no-array-index-key
-              key={i}
-              onClick={() => onInputClick(val)}
-            >
-              {val}
-            </button>
-          );
-        })}
+        {numberInputs.map((val, i) => (
+          <ButtonInput
+            buttonUsed={board.buttonInputs[val]}
+            isGameOver={isGameOver}
+            onInputClick={onInputClick}
+            val={val}
+            // justification the gameboard is consistent.
+            // eslint-disable-next-line react/no-array-index-key
+            key={i}
+          />
+        ))}
       </div>
       <div className="flex flex-wrap gap-3 justify-center">
         <button
@@ -78,29 +94,17 @@ export default function ButtonInputs({
         >
           Submit
         </button>
-        {operatorInputs.map((val, i) => {
-          const buttonUsed = board.buttonInputs[val];
-
-          let buttonUsedClass = 'btn-outline btn-secondary';
-          if (typeof buttonUsed !== 'undefined') {
-            buttonUsedClass = buttonGuessStateToClassName(buttonUsed);
-          }
-          return (
-            <button
-              className={
-                isGameOver ? 'btn btn-disabled' : `btn ${buttonUsedClass}`
-              }
-              type="button"
-              disabled={isGameOver}
-              // justification, input array is fixed and never changes.
-              // eslint-disable-next-line react/no-array-index-key
-              key={i}
-              onClick={() => onInputClick(val)}
-            >
-              {val}
-            </button>
-          );
-        })}
+        {operatorInputs.map((val, i) => (
+          <ButtonInput
+            buttonUsed={board.buttonInputs[val]}
+            isGameOver={isGameOver}
+            onInputClick={onInputClick}
+            val={val}
+            // justification the gameboard is consistent.
+            // eslint-disable-next-line react/no-array-index-key
+            key={i}
+          />
+        ))}
         <button
           type="button"
           className={
