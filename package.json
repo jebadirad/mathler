@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "test:watch": "jest --watch --coverage",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "test:e2e": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:ui:docker": "playwright test --ui-port=8080 --ui-host=127.0.0.1"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -30,6 +33,7 @@
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^13.4.6",
+    "@playwright/test": "^1.35.1",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
     "@types/lodash": "^4.14.195",

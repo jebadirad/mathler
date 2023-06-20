@@ -25,6 +25,7 @@ function ErrorBanner({
           type="button"
           className="btn btn-circle btn-outline btn-xs"
           onClick={onClose}
+          aria-label="error-close-button"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
