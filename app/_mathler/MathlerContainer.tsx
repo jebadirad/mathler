@@ -95,7 +95,12 @@ export default function MathlerContainer({
     return () => {
       document.removeEventListener('keydown', docEventListener, false);
     };
-  }, [handleButtonClick, handleDeleteClick, submitAction]);
+  }, [
+    gameState.isGameOver,
+    handleButtonClick,
+    handleDeleteClick,
+    submitAction,
+  ]);
 
   return (
     <div>
@@ -107,7 +112,7 @@ export default function MathlerContainer({
         {gameState.board.map((val, i) => (
           // justification, its a static array of 6 items, so the indicies will always be the same.
           // eslint-disable-next-line react/no-array-index-key
-          <MathlerRow key={i + 1} row={val} />
+          <MathlerRow key={i + 1} row={val} index={i} />
         ))}
       </div>
       <div className="py-4">

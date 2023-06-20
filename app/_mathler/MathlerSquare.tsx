@@ -1,10 +1,11 @@
 import { GuessSpotState, Square } from '../../components/Mathler.types';
 
-type MathlerSquareProps = Square & {};
+type MathlerSquareProps = Square & { index: string };
 
 export default function MathlerSquare({
   guessState,
   value,
+  index,
 }: MathlerSquareProps) {
   let successStateClass = '';
   switch (guessState) {
@@ -31,9 +32,10 @@ export default function MathlerSquare({
   }
   return (
     <div
+      data-testid={index}
       className={`border-base-content border-2 w-14 h-10 flex justify-center items-center ${successStateClass}`}
     >
-      <span className="">{value === null ? '' : value}</span>
+      <span>{value === null ? '' : value}</span>
     </div>
   );
 }
