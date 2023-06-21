@@ -69,8 +69,8 @@ export default function ButtonInputs({
   isGameOver,
 }: ButtonInputsProps) {
   return (
-    <div className="flex gap-2 flex-col">
-      <div className="flex flex-wrap justify-between">
+    <div className="flex sm:gap-6 gap-4 flex-col">
+      <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
         {numberInputs.map((val, i) => (
           <ButtonInput
             buttonUsed={board.buttonInputs[val]}
@@ -83,17 +83,7 @@ export default function ButtonInputs({
           />
         ))}
       </div>
-      <div className="flex flex-wrap gap-3 justify-center">
-        <button
-          type="button"
-          className={
-            isGameOver ? 'btn btn-disabled' : 'btn btn-outline btn-primary'
-          }
-          onClick={onSubmitClick}
-          disabled={isGameOver}
-        >
-          Submit
-        </button>
+      <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
         {operatorInputs.map((val, i) => (
           <ButtonInput
             buttonUsed={board.buttonInputs[val]}
@@ -105,6 +95,18 @@ export default function ButtonInputs({
             key={i}
           />
         ))}
+      </div>
+      <div className="flex flex-wrap justify-center gap-4">
+        <button
+          type="button"
+          className={
+            isGameOver ? 'btn btn-disabled' : 'btn btn-outline btn-primary'
+          }
+          onClick={onSubmitClick}
+          disabled={isGameOver}
+        >
+          Submit
+        </button>
         <button
           type="button"
           className={
