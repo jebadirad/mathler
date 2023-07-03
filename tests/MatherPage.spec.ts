@@ -3,7 +3,7 @@ import { Mathler } from '../components/Mathler';
 
 test('should submit the correct answer', async ({ page }) => {
   await page.goto('http://localhost:3000/');
-  const expression = Mathler.getTodaysAnswers()
+  const expression = Mathler.getTodaysAnswers(new Date())
     .expression.replaceAll(' ', '')
     .split('');
   for (let i = 0; i < expression.length; i += 1) {
@@ -67,7 +67,7 @@ test('should enter and delete entries', async ({ page }) => {
 test('should have the equation answer at the top', async ({ page }) => {
   await page.goto('http://localhost:3000/');
 
-  const val = Mathler.getTodaysAnswers().value;
+  const val = Mathler.getTodaysAnswers(new Date()).value;
   await expect(
     page.getByText(`Find the hidden calculation that equals ${val}`)
   ).toBeVisible();
