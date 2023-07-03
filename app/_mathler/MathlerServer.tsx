@@ -14,7 +14,7 @@ export default function MathlerServer() {
       <form>
         <MathlerContainer
           handleSubmit={validateGameBoard}
-          todaysAnswer={Mathler.getTodaysAnswers().value}
+          todaysAnswer={Mathler.getTodaysAnswers(new Date()).value}
         />
       </form>
     </div>

@@ -8,7 +8,7 @@ const getMockAnswers = jest
 describe('Mathler tests', () => {
   it('should make a guess with no matches but correct values', () => {
     const gameBoard = { ...initialGameBoard };
-    const answer = Mathler.getTodaysAnswers();
+    const answer = Mathler.getTodaysAnswers(new Date());
     gameBoard.board[1] = answer.expression
       .replaceAll(' ', '')
       .split('')

@@ -3,7 +3,11 @@
 import { useTransition, useState, useCallback, useEffect } from 'react';
 import { evaluate } from 'mathjs';
 import { initialGameBoard } from '../../components/Mathler';
-import { GameBoard, isValidValue } from '../../components/Mathler.types';
+import {
+  GameBoard,
+  isOperator,
+  isValidValue,
+} from '../../components/Mathler.types';
 import MathlerRow from './MathlerRow';
 import ButtonInputs from './ButtonInputs';
 import ErrorBanner from './ErrorBanner';
@@ -33,6 +37,13 @@ export default function MathlerContainer({
         setErrorTransitionState('in');
         return;
       }
+      const filterOperator = expression.split('').filter((i) => isOperator(i));
+      if (filterOperator.length === 0) {
+        setErrorMessage('Must have at least 1 operator');
+        setErrorTransitionState('in');
+        return;
+      }
+
       const answer = evaluate(expression);
       if (answer === todaysAnswer) {
         startTransition(async () => {

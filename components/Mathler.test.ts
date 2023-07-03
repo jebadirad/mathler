@@ -39,12 +39,12 @@ describe('Mathler tests', () => {
       expression: answers[val],
       value: Mathler.evaluateAnswer(answers[val]).answer,
     };
-    expect(Mathler.getTodaysAnswers()).toEqual(evaluated);
+    expect(Mathler.getTodaysAnswers(new Date())).toEqual(evaluated);
   });
 
   it('should evaluate a winning gameboard', () => {
     const gameBoard = { ...initialGameBoard };
-    const answer = Mathler.getTodaysAnswers();
+    const answer = Mathler.getTodaysAnswers(new Date());
 
     gameBoard.board[0] = answer.expression
       .replaceAll(' ', '')
@@ -72,7 +72,7 @@ describe('Mathler tests', () => {
   });
   it('should evaluate a winning gameboard on the second round', () => {
     const gameBoard = { ...initialGameBoard };
-    const answer = Mathler.getTodaysAnswers();
+    const answer = Mathler.getTodaysAnswers(new Date());
     gameBoard.board[0] = gameBoard.board[0].map((item) => ({
       ...item,
       value: '0',
@@ -109,7 +109,7 @@ describe('Mathler tests', () => {
   });
   it('should fail the game when theres too many guesses', () => {
     const gameBoard = { ...initialGameBoard };
-    const answer = Mathler.getTodaysAnswers();
+    const answer = Mathler.getTodaysAnswers(new Date());
 
     gameBoard.board[0] = answer.expression
       .replaceAll(' ', '')
@@ -134,7 +134,7 @@ describe('Mathler tests', () => {
   });
   it('should make a guess with partial matches', () => {
     const gameBoard = { ...initialGameBoard };
-    const answer = Mathler.getTodaysAnswers();
+    const answer = Mathler.getTodaysAnswers(new Date());
     gameBoard.board[0] = gameBoard.board[0].map((item) => ({
       ...item,
       value: '0',
@@ -178,7 +178,7 @@ describe('Mathler tests', () => {
   });
   it('should make a guess with no matches', () => {
     const gameBoard = { ...initialGameBoard };
-    const answer = Mathler.getTodaysAnswers();
+    const answer = Mathler.getTodaysAnswers(new Date());
     gameBoard.board[0] = gameBoard.board[0].map((item) => ({
       ...item,
       value: '0',

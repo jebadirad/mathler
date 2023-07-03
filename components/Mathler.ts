@@ -4,172 +4,30 @@ import answers from './MathlerAnswers';
 import {
   GameBoard,
   GuessSpotState,
-  NumberValue,
-  Operator,
+  Square,
+  isOperator,
   isValidValue,
+  operatorRegEx,
+  Row,
 } from './Mathler.types';
 
-export const initialGameBoard: GameBoard = {
-  board: [
-    [
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-    ],
-    [
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-    ],
-    [
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-    ],
-    [
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-    ],
-    [
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-    ],
-    [
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-      {
-        guessState: GuessSpotState.Empty,
-        value: null,
-      },
-    ],
-  ],
-  currentIndex: 0,
+type GameConfiguration = {
+  rows: number;
+  columns: number;
+};
+
+const configureGameBoard = ({
+  rows,
+  columns,
+}: GameConfiguration): GameBoard => ({
   isGameOver: false,
+  currentIndex: 0,
+  board: Array.from({ length: rows }, () =>
+    Array.from({ length: columns }, () => ({
+      value: null,
+      guessState: GuessSpotState.Empty,
+    }))
+  ),
   buttonInputs: {
     '*': GuessSpotState.Empty,
     '+': GuessSpotState.Empty,
@@ -186,212 +44,226 @@ export const initialGameBoard: GameBoard = {
     '8': GuessSpotState.Empty,
     '9': GuessSpotState.Empty,
   },
-};
+});
+
+export const initialGameBoard: GameBoard = configureGameBoard({
+  rows: 6,
+  columns: 6,
+});
 
 export class Mathler {
+  static checkForCorrectAnswer({
+    answer,
+    submitted,
+  }: {
+    submitted: string;
+    answer: string;
+  }): boolean {
+    if (answer === submitted) {
+      return true;
+    }
+    if (evaluate(submitted) === evaluate(answer)) {
+      /** quickly check commutative / associative
+       * example
+       * 11 + 10 + 5
+       * [11, 10, 5], [+,+]
+       * 5,10,11,+,+
+       *
+       *
+       * 10 + 15 + 1 will not match
+       * [1, 10, 15], [+,+]
+       * 1,10,15,+,+
+       *
+       * 24 * 2 - 9 and 2 * 24 - 9 also works
+       *
+       * 2 9 24 * -
+       */
+      const submittedOperators = submitted
+        .split('')
+        .filter((i) => isOperator(i))
+        .sort();
+      const submittedValues = submitted
+        .split(operatorRegEx)
+        .sort()
+        .concat(submittedOperators)
+        .join('');
+
+      const answerOperators = answer
+        .split('')
+        .filter((i) => isOperator(i))
+        .sort();
+      const answerValues = answer
+        .split(operatorRegEx)
+        .sort()
+        .concat(answerOperators)
+        .join('');
+
+      return submittedValues === answerValues;
+    }
+
+    return false;
+  }
+
+  static setSquareGuess({
+    square,
+    guess,
+  }: {
+    square: Square;
+    guess: GuessSpotState;
+  }): Square {
+    return {
+      ...square,
+      guessState: guess,
+    };
+  }
+
+  static validateInputButtons({
+    answer,
+    submitted,
+    board,
+  }: {
+    submitted: string;
+    answer: string;
+    board: GameBoard;
+  }): GameBoard['buttonInputs'] {
+    const answerBreakdown = _.countBy(answer.split(''), (a) => a);
+    const submittedBreakdown = _.countBy(submitted.split(''), (a) => a);
+    const btns = board.buttonInputs;
+    Object.entries(submittedBreakdown).forEach(([key, value]) => {
+      if (isValidValue(key)) {
+        const ans = answerBreakdown[key];
+        if (ans) {
+          if (ans === value) {
+            btns[key] = GuessSpotState.Correct;
+          } else {
+            btns[key] = GuessSpotState.ValueOnly;
+          }
+        } else {
+          btns[key] = GuessSpotState.Wrong;
+        }
+      }
+    });
+
+    return btns;
+  }
+
+  static checkTerms({
+    answer,
+    submitted,
+    board,
+  }: {
+    submitted: string;
+    answer: string;
+    board: GameBoard;
+  }): Row {
+    const currentRow = board.board[board.currentIndex];
+    const answerBreakdown = _.countBy(answer.split(''), (a) => a);
+
+    submitted.split('').forEach((t, i, arr) => {
+      if (currentRow[i].guessState === GuessSpotState.Empty) {
+        if (answer[i] === t) {
+          currentRow[i] = this.setSquareGuess({
+            square: currentRow[i],
+            guess: GuessSpotState.Correct,
+          });
+        } else {
+          const ansCount = answerBreakdown[t];
+          if (typeof ansCount === 'undefined') {
+            currentRow[i] = this.setSquareGuess({
+              square: currentRow[i],
+              guess: GuessSpotState.Wrong,
+            });
+          } else {
+            let currCount = 0;
+            // set initial
+            for (let m = 0; m <= i; m += 1) {
+              if (arr[m] === t) {
+                currCount += 1;
+              }
+            }
+            const stopCount = ansCount;
+
+            arr.forEach((duplicateTerm, di) => {
+              if (
+                duplicateTerm === t &&
+                currentRow[di].guessState === GuessSpotState.Empty
+              ) {
+                if (currCount <= stopCount) {
+                  currentRow[di] = this.setSquareGuess({
+                    square: currentRow[di],
+                    guess: GuessSpotState.ValueOnly,
+                  });
+                  currCount += 1;
+                } else {
+                  currentRow[di] = this.setSquareGuess({
+                    square: currentRow[di],
+                    guess: GuessSpotState.Wrong,
+                  });
+                }
+              }
+            });
+          }
+        }
+      }
+    });
+
+    return currentRow;
+  }
+
   static validateGameBoard(board: GameBoard): GameBoard {
     const gb = board;
-
+    const row = gb.board[gb.currentIndex];
     if (gb.currentIndex >= 6) {
       // check if a gameover board was submitted.
       gb.isGameOver = true;
       return gb;
     }
-
-    const row = gb.board[gb.currentIndex];
     const submittedAnswer = row.map((item) => item.value).join('');
-
-    const answer = Mathler.getTodaysAnswers();
+    const answer = Mathler.getTodaysAnswers(new Date());
     const answerExpression = answer.expression.replaceAll(' ', '');
 
     const evaluatedAnswer = Mathler.evaluateAnswer(submittedAnswer);
-
     if (evaluatedAnswer.isValid) {
       if (
-        evaluatedAnswer.answer === answer.value &&
-        submittedAnswer === answerExpression
+        this.checkForCorrectAnswer({
+          answer: answerExpression,
+          submitted: submittedAnswer,
+        })
       ) {
-        // perfect match. instant win.
-        const updatedRow = row.map((item) => {
-          if (item.value) {
-            gb.buttonInputs[item.value] = GuessSpotState.Correct;
-          }
-          return {
-            ...item,
-            guessState: GuessSpotState.Correct,
-          };
-        });
-
-        gb.board[gb.currentIndex] = updatedRow;
+        gb.board[gb.currentIndex] = row.map((item) =>
+          this.setSquareGuess({
+            square: item,
+            guess: GuessSpotState.Correct,
+          })
+        );
         gb.isGameOver = true;
         return gb;
       }
 
-      // convert the current row into an object where each key is an input value,
-      // and the value is an array of indicies the key exists in the row.
-      const submittedObject = row.reduce<
-        Partial<Record<Operator | NumberValue, Array<number>>>
-      >((acc, curr, index) => {
-        if (curr.value) {
-          const itemInAcc = acc[curr.value];
-          if (itemInAcc) {
-            itemInAcc.push(index);
-          } else {
-            acc[curr.value] = [index];
-          }
-        }
-        return acc;
-      }, {});
-
-      // create the same object for the expression.
-      const expressionObject = answerExpression
-        .split('')
-        .reduce<Partial<Record<Operator | NumberValue, Array<number>>>>(
-          (acc, curr, index) => {
-            if (isValidValue(curr)) {
-              if (curr) {
-                const itemInAcc = acc[curr];
-                if (itemInAcc) {
-                  itemInAcc.push(index);
-                } else {
-                  acc[curr] = [index];
-                }
-              }
-            }
-            return acc;
-          },
-          {}
-        );
-
-      // we can compare the two expression objects to determine the state of the game.
-      Object.entries(submittedObject).forEach(([key, submittedValue]) => {
-        if (isValidValue(key)) {
-          const val = expressionObject[key];
-          if (val) {
-            // get the intersection of the indices.
-            // ex: if the submission is 111-30
-            // and the answer is 119-41.
-            // for the key `1` we have indices at 0,1,2 and 0,1,5'
-            // the intersection would be 0,1.
-            const intersect = _.intersection(submittedValue, val);
-            if (
-              intersect.length === val.length &&
-              intersect.length === submittedValue.length
-            ) {
-              // total match for current key.
-              submittedValue.forEach((v) => {
-                row[v].guessState = GuessSpotState.Correct;
-                const rowVal = row[v].value;
-                if (rowVal) {
-                  // also set the button to the correct state.
-                  gb.buttonInputs[rowVal] = GuessSpotState.Correct;
-                }
-              });
-            } else {
-              // not a total match, we also handle duplicates here.
-              // the intersection are correct spots, so we can set those now.
-              intersect.forEach((v) => {
-                row[v].guessState = GuessSpotState.Correct;
-                const rowVal = row[v].value;
-                if (rowVal) {
-                  gb.buttonInputs[rowVal] = GuessSpotState.Correct;
-                }
-              });
-              if (
-                val.length === submittedValue.length ||
-                val.length > submittedValue.length
-              ) {
-                // first we check if the real answer has more or equal indices than the submitted.
-                submittedValue.forEach((v) => {
-                  // if it does, then we know that as long as it wasn't in the intersection,
-                  // we can assign it a correct value but not position mark.
-                  if (row[v].guessState !== GuessSpotState.Correct) {
-                    row[v].guessState = GuessSpotState.ValueOnly;
-                    const rowVal = row[v].value;
-                    if (rowVal) {
-                      gb.buttonInputs[rowVal] = GuessSpotState.ValueOnly;
-                    }
-                  } else if (
-                    row[v].guessState === GuessSpotState.Correct &&
-                    val.length > submittedValue.length
-                  ) {
-                    // if it is in the intersection, we want to set the button color to yellow as
-                    // we have more of this value to set correctly.
-                    row[v].guessState = GuessSpotState.Correct;
-                    const rowVal = row[v].value;
-                    if (rowVal) {
-                      gb.buttonInputs[rowVal] = GuessSpotState.ValueOnly;
-                    }
-                  }
-                });
-              } else {
-                // if the submitted answer has more duplicate entires than the real answer.
-                let countFound = intersect.length;
-                // we take a count of how many duplicates of a value exist.
-                // starting with the correct matches in the intersection.
-                submittedValue.forEach((v) => {
-                  // if the key does not exist in the expression, meaning that the index
-                  // of a specific value does not match any indices of the value in the answer.
-
-                  const expectedMatch = val.indexOf(v);
-                  if (expectedMatch === -1) {
-                    // as long as the countFound is less than the length of the
-                    // indices in the answer, we know this particular duplicate is still valid.
-                    if (countFound < val.length) {
-                      row[v].guessState = GuessSpotState.ValueOnly;
-                      const rowVal = row[v].value;
-                      if (rowVal) {
-                        gb.buttonInputs[rowVal] = GuessSpotState.ValueOnly;
-                      }
-                      countFound += 1;
-                    } else {
-                      // for every duplicate found outside of the length, we know its wrong.
-                      // ex: submitting 111-14 against 119-41
-                      // we get indices for `1` as such:
-                      // 0,1,2,4 and 0,1,5
-                      // we know 0 and 1 match so countFound starts at 2.
-                      // when we read 2 we know that countFound is less than the length of 0,1,5.
-                      // so we can assume the `1` and index 2 is the right value.
-                      // whne we get to `4` we now know that there are no more `1`s and can say this
-                      // particular 1 is now wrong.
-                      row[v].guessState = GuessSpotState.Wrong;
-                      const rowVal = row[v].value;
-                      if (rowVal) {
-                        gb.buttonInputs[rowVal] = GuessSpotState.Wrong;
-                      }
-                    }
-                  }
-                });
-              }
-            }
-          } else {
-            // the key in the submission doesn't match any key in the answer
-            // so any indices this key existed at is wrong.
-            submittedValue.forEach((v) => {
-              row[v].guessState = GuessSpotState.Wrong;
-              const rowVal = row[v].value;
-              if (rowVal) {
-                gb.buttonInputs[rowVal] = GuessSpotState.Wrong;
-              }
-            });
-          }
-        }
+      gb.board[gb.currentIndex] = this.checkTerms({
+        answer: answerExpression,
+        submitted: submittedAnswer,
+        board,
       });
-      gb.board[gb.currentIndex] = row;
+      gb.buttonInputs = this.validateInputButtons({
+        answer: answerExpression,
+        submitted: submittedAnswer,
+        board: gb,
+      });
       gb.currentIndex += 1;
       if (gb.currentIndex >= 6) {
         gb.isGameOver = true;
       }
     }
+
     return gb;
   }
 
-  static getTodaysAnswers(): {
+  static getTodaysAnswers(date: Date): {
     expression: string;
     value: number;
   } {
-    const today = new Date();
-    const currentDate = today.getDate();
+    const currentDate = date.getDate();
     const expression = answers[currentDate % 10];
     return {
       expression,

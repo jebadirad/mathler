@@ -28,16 +28,26 @@ export const numberInputs = [
 ] as const;
 export const operatorInputs = ['+', '-', '/', '*'] as const;
 
+export const isOperator = (val: string): val is Operator => {
+  if (operatorInputs.findIndex((i) => i === val) > -1) {
+    return true;
+  }
+  return false;
+};
+
+export const operatorRegEx = new RegExp(
+  operatorInputs.map((o) => `[${o}]`).join('|'),
+  'g'
+);
+
 export const isValidValue = (val: string): val is Operator | NumberValue => {
-  if (
-    numberInputs.findIndex((i) => i === val) > -1 ||
-    operatorInputs.findIndex((i) => i === val) > -1
-  ) {
+  if (numberInputs.findIndex((i) => i === val) > -1 || isOperator(val)) {
     return true;
   }
 
   return false;
 };
+
 export type Operator = '+' | '-' | '/' | '*';
 export type NumberValue =
   | '0'
