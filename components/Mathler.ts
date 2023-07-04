@@ -186,6 +186,33 @@ export class Mathler {
   }
 
   /**
+   * Used to count the amount of characters ahead of the starting position 
+   * that match the needle AND are in a correct state. 
+   * 
+   * 
+   *    
+   * */
+  static getCountOfCharactersAlreadySetCorrectlyAhead({
+    row,
+    needle,
+    starting,
+  }: {
+    needle: string;
+    row: Row;
+    starting: number;
+  }): number {
+    let count = 0;
+    for (let i = starting; i < row.length; i += 1) {
+      const sq = row[i];
+      if (sq.value === needle && sq.guessState === GuessSpotState.Correct) {
+        count += 1;
+      }
+    }
+
+    return count;
+  }
+
+  /**
    * Method used to determine if a term matches completely to a
    * term in the answer.
    *
@@ -202,8 +229,9 @@ export class Mathler {
     const currentRow = board.board[board.currentIndex];
     const answerTerms = answer.split(/(?=[+*-/])|(?<=[+*-/])/g);
     const submittedTerms = submitted.split(/(?=[+*-/])|(?<=[+*-/])/g);
+
     submittedTerms.forEach((term, i, arr) => {
-      if (answerTerms.includes(term)) {
+      if (answerTerms.includes(term) && !isOperator(term)) {
         const termsParsed = arr.slice(0, i);
         const lengthOfTerms = termsParsed.join('').length;
         for (let j = lengthOfTerms; j < lengthOfTerms + term.length; j += 1) {
@@ -245,6 +273,12 @@ export class Mathler {
       haystack: submitted,
       needle,
       stop: positionInSubmitted,
+    });
+
+    currCount += this.getCountOfCharactersAlreadySetCorrectlyAhead({
+      needle,
+      row,
+      starting: positionInSubmitted,
     });
 
     submitted.forEach((term, index) => {
@@ -291,7 +325,7 @@ export class Mathler {
       const answerCharacter = answer[i];
       if (
         currentValue &&
-        !isOperator(currentValue) &&
+        //  !isOperator(currentValue) &&
         currentRow[i].guessState === GuessSpotState.Empty
       ) {
         if (answerCharacter === submittedCharacter) {
