@@ -14,6 +14,7 @@ export enum GuessSpotState {
 }
 
 export type Row = Array<Square>;
+
 export const numberInputs = [
   '0',
   '1',
@@ -48,18 +49,9 @@ export const isValidValue = (val: string): val is Operator | NumberValue => {
   return false;
 };
 
-export type Operator = '+' | '-' | '/' | '*';
-export type NumberValue =
-  | '0'
-  | '1'
-  | '2'
-  | '3'
-  | '4'
-  | '5'
-  | '6'
-  | '7'
-  | '8'
-  | '9';
+export type Operator = (typeof operatorInputs)[number];
+export type NumberValue = (typeof numberInputs)[number];
+
 export type Square = {
   value: Operator | NumberValue | null;
   guessState: GuessSpotState;

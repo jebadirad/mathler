@@ -52,6 +52,13 @@ export const initialGameBoard: GameBoard = configureGameBoard({
 });
 
 export class Mathler {
+  /**
+   * Used to correctly identify if the submitted answer
+   * is a match for a win.
+   *
+   * Handles perfect matches as well as
+   * associative and commutative properties of addition and multiplication
+   */
   static checkForCorrectAnswer({
     answer,
     submitted,
@@ -103,6 +110,10 @@ export class Mathler {
     return false;
   }
 
+  /**
+   * Used to set the guess state of a sqaure.
+   * Does not mutate the original square.
+   */
   static setSquareGuess({
     square,
     guess,
@@ -116,6 +127,10 @@ export class Mathler {
     };
   }
 
+  /**
+   * used to update the state of the button inputs based on the
+   * last row of the gameboard.
+   */
   static validateInputButtons({
     answer,
     submitted,
@@ -146,6 +161,12 @@ export class Mathler {
     return btns;
   }
 
+  /**
+   * Method used to search through a collection and find the amount of
+   * times a string exists before hitting the "stop"
+   *
+   * Used internally to check for duplicate numbers in an expression.
+   */
   static getCountOfCharactersAlreadyViewed({
     stop,
     needle,
@@ -164,6 +185,11 @@ export class Mathler {
     return currCount;
   }
 
+  /**
+   * Method used to determine if a term matches completely to a
+   * term in the answer.
+   *
+   */
   static checkTermsCompletelyCorrect({
     answer,
     submitted,
@@ -194,6 +220,11 @@ export class Mathler {
     return currentRow;
   }
 
+  /**
+   * Method used when an individual term does not match completely in the
+   * expression. We want to break down the terms by individual character and
+   * see if they match in the answer.
+   */
   static checkTermsByIndexWithDuplicates({
     answer,
     submitted,
@@ -261,6 +292,10 @@ export class Mathler {
     return currentRow;
   }
 
+  /**
+   * Used to validate the terms of the last row of the gameboard.
+   * This will determine the correctness of each square.
+   */
   static checkTerms({
     answer,
     submitted,
@@ -282,6 +317,10 @@ export class Mathler {
     return currentRow;
   }
 
+  /**
+   * Main method used when an answer is submitted.
+   *
+   */
   static validateGameBoard({
     board,
     date = new Date(),
@@ -341,6 +380,9 @@ export class Mathler {
     return gb;
   }
 
+  /**
+   * Fetches an answer and evaluates it based on the passed in date.
+   */
   static getTodaysAnswers(date: Date): {
     expression: string;
     value: number;
@@ -353,6 +395,10 @@ export class Mathler {
     };
   }
 
+  /**
+   * Attempts to evaluate the answer. If the answer is invalid it returns
+   * null for the answer and false for isvalid.
+   */
   static evaluateAnswer(exp: string): {
     answer: number | null;
     isValid: boolean;
