@@ -1,4 +1,4 @@
-import { Mathler, initialGameBoard } from './Mathler';
+import { Mathler, configureGameBoard } from './Mathler';
 import { GuessSpotState, isValidValue } from './Mathler.types';
 import answers from './MathlerAnswers';
 
@@ -43,7 +43,7 @@ describe('Mathler tests', () => {
   });
 
   it('should evaluate a winning gameboard', () => {
-    const gameBoard = { ...initialGameBoard };
+    const gameBoard = configureGameBoard({ rows: 6, columns: 6 });
     const answer = Mathler.getTodaysAnswers(new Date());
 
     gameBoard.board[0] = answer.expression
@@ -71,7 +71,7 @@ describe('Mathler tests', () => {
     });
   });
   it('should evaluate a winning gameboard on the second round', () => {
-    const gameBoard = { ...initialGameBoard };
+    const gameBoard = configureGameBoard({ rows: 6, columns: 6 });
     const answer = Mathler.getTodaysAnswers(new Date());
     gameBoard.board[0] = gameBoard.board[0].map((item) => ({
       ...item,
@@ -108,7 +108,7 @@ describe('Mathler tests', () => {
     });
   });
   it('should fail the game when theres too many guesses', () => {
-    const gameBoard = { ...initialGameBoard };
+    const gameBoard = configureGameBoard({ rows: 6, columns: 6 });
     const answer = Mathler.getTodaysAnswers(new Date());
 
     gameBoard.board[0] = answer.expression

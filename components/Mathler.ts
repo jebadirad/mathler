@@ -16,7 +16,7 @@ type GameConfiguration = {
   columns: number;
 };
 
-const configureGameBoard = ({
+export const configureGameBoard = ({
   rows,
   columns,
 }: GameConfiguration): GameBoard => ({
@@ -304,10 +304,10 @@ export class Mathler {
       return gb;
     }
     const submittedAnswer = row.map((item) => item.value).join('');
-    const answer = Mathler.getTodaysAnswers(date);
+    const answer = this.getTodaysAnswers(date);
     const answerExpression = answer.expression.replaceAll(' ', '');
 
-    const evaluatedAnswer = Mathler.evaluateAnswer(submittedAnswer);
+    const evaluatedAnswer = this.evaluateAnswer(submittedAnswer);
     if (evaluatedAnswer.isValid && evaluatedAnswer.answer === answer.value) {
       if (
         this.checkForCorrectAnswer({

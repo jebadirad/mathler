@@ -1,4 +1,4 @@
-import { Mathler, initialGameBoard } from './Mathler';
+import { Mathler, configureGameBoard } from './Mathler';
 import { GuessSpotState, Row } from './Mathler.types';
 
 const getMockAnswers = jest
@@ -17,7 +17,7 @@ describe('Mathler tests', () => {
       expression: `2 * 24 - 9`,
       value: 2 * 24 - 9,
     }));
-    const gameBoard = { ...initialGameBoard };
+    const gameBoard = configureGameBoard({ rows: 6, columns: 6 });
     const answer = Mathler.getTodaysAnswers(new Date());
     gameBoard.board[1] = answer.expression
       .replaceAll(' ', '')
@@ -65,13 +65,21 @@ describe('Mathler tests', () => {
     expect(validated.board[1][3].guessState).toEqual(GuessSpotState.Correct);
     expect(validated.board[1][4].guessState).toEqual(GuessSpotState.Correct);
     expect(validated.board[1][5].guessState).toEqual(GuessSpotState.Correct);
+
+    expect(validated.buttonInputs['9']).toEqual(GuessSpotState.Correct);
+    expect(validated.buttonInputs['-']).toEqual(GuessSpotState.Correct);
+    expect(validated.buttonInputs['4']).toEqual(GuessSpotState.Correct);
+    expect(validated.buttonInputs['*']).toEqual(GuessSpotState.Correct);
+    expect(validated.buttonInputs['2']).toEqual(GuessSpotState.ValueOnly);
+    expect(validated.buttonInputs['1']).toEqual(GuessSpotState.Wrong);
+    expect(validated.buttonInputs['/']).toEqual(GuessSpotState.Empty);
   });
   it('should make a guess with some duplicates but it matches in quantity', () => {
     getMockAnswers.mockImplementation(() => ({
       expression: `119 - 41`,
       value: 78,
     }));
-    const gameBoard = { ...initialGameBoard };
+    const gameBoard = configureGameBoard({ rows: 6, columns: 6 });
     gameBoard.board[0] = gameBoard.board[0].map((item) => ({
       ...item,
       value: '0',
@@ -118,13 +126,20 @@ describe('Mathler tests', () => {
     expect(validated.board[1][3].guessState).toEqual(GuessSpotState.Correct);
     expect(validated.board[1][4].guessState).toEqual(GuessSpotState.Wrong);
     expect(validated.board[1][5].guessState).toEqual(GuessSpotState.ValueOnly);
+
+    expect(validated.buttonInputs['9']).toEqual(GuessSpotState.ValueOnly);
+    expect(validated.buttonInputs['7']).toEqual(GuessSpotState.Wrong);
+    expect(validated.buttonInputs['-']).toEqual(GuessSpotState.Correct);
+    expect(validated.buttonInputs['3']).toEqual(GuessSpotState.Wrong);
+    expect(validated.buttonInputs['1']).toEqual(GuessSpotState.ValueOnly);
+    expect(validated.buttonInputs['/']).toEqual(GuessSpotState.Empty);
   });
   it('should make a guess with some duplicates but has extra in quantity', () => {
     getMockAnswers.mockImplementation(() => ({
       expression: `10 + 1 + 2`,
       value: 13,
     }));
-    const gameBoard = { ...initialGameBoard };
+    const gameBoard = configureGameBoard({ rows: 6, columns: 6 });
     gameBoard.board[0] = gameBoard.board[0].map((item) => ({
       ...item,
       value: '0',
@@ -171,9 +186,13 @@ describe('Mathler tests', () => {
     expect(validated.board[1][3].guessState).toEqual(GuessSpotState.Correct);
     expect(validated.board[1][4].guessState).toEqual(GuessSpotState.Wrong);
     expect(validated.board[1][5].guessState).toEqual(GuessSpotState.Wrong);
+
+    expect(validated.buttonInputs['+']).toEqual(GuessSpotState.Correct);
+    expect(validated.buttonInputs['1']).toEqual(GuessSpotState.ValueOnly);
+    expect(validated.buttonInputs['/']).toEqual(GuessSpotState.Empty);
   });
   it('should make no changes when an expression is invalid', () => {
-    const gameBoard = { ...initialGameBoard };
+    const gameBoard = configureGameBoard({ rows: 6, columns: 6 });
     gameBoard.board[0] = gameBoard.board[0].map((item) => ({
       ...item,
       value: '0',
@@ -219,13 +238,16 @@ describe('Mathler tests', () => {
       expect(item.guessState).toEqual(row[i].guessState);
       expect(item.value).toEqual(row[i].value);
     });
+    Object.values(validated.buttonInputs).forEach((v) => {
+      expect(v).toEqual(GuessSpotState.Empty);
+    });
   });
   it('shoud solve associate and communitive properties', () => {
     getMockAnswers.mockImplementation(() => ({
       expression: `2 * 24 + 9`,
       value: 2 * 24 + 9,
     }));
-    const gameBoard = { ...initialGameBoard };
+    const gameBoard = configureGameBoard({ rows: 6, columns: 6 });
 
     const row: Row = [
       {
@@ -265,13 +287,21 @@ describe('Mathler tests', () => {
     validated.board[0].forEach((item) => {
       expect(item.guessState).toEqual(GuessSpotState.Correct);
     });
+    // instant win, buttons are disabled and never get checked.
+    expect(validated.buttonInputs['9']).toEqual(GuessSpotState.Empty);
+    expect(validated.buttonInputs['+']).toEqual(GuessSpotState.Empty);
+    expect(validated.buttonInputs['4']).toEqual(GuessSpotState.Empty);
+    expect(validated.buttonInputs['*']).toEqual(GuessSpotState.Empty);
+    expect(validated.buttonInputs['2']).toEqual(GuessSpotState.Empty);
+    expect(validated.buttonInputs['1']).toEqual(GuessSpotState.Empty);
+    expect(validated.buttonInputs['/']).toEqual(GuessSpotState.Empty);
   });
   it('shoud solve term matches', () => {
     getMockAnswers.mockImplementation(() => ({
       expression: `33 + 2 - 9`,
       value: 33 + 2 - 9,
     }));
-    const gameBoard = { ...initialGameBoard };
+    const gameBoard = configureGameBoard({ rows: 6, columns: 6 });
 
     const row: Row = [
       {
@@ -314,5 +344,13 @@ describe('Mathler tests', () => {
     expect(validated.board[0][3].guessState).toEqual(GuessSpotState.Correct);
     expect(validated.board[0][4].guessState).toEqual(GuessSpotState.Correct);
     expect(validated.board[0][5].guessState).toEqual(GuessSpotState.Wrong);
+
+    expect(validated.buttonInputs['9']).toEqual(GuessSpotState.Empty);
+    expect(validated.buttonInputs['+']).toEqual(GuessSpotState.Correct);
+    expect(validated.buttonInputs['-']).toEqual(GuessSpotState.Correct);
+    expect(validated.buttonInputs['3']).toEqual(GuessSpotState.Correct);
+    expect(validated.buttonInputs['8']).toEqual(GuessSpotState.Wrong);
+    expect(validated.buttonInputs['1']).toEqual(GuessSpotState.Wrong);
+    expect(validated.buttonInputs['/']).toEqual(GuessSpotState.Empty);
   });
 });
