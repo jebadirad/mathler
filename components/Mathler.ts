@@ -221,6 +221,55 @@ export class Mathler {
   }
 
   /**
+   * Handles iterating through the submission looking for a specific character,
+   * checks have many times that character already have been taken into consideration from other operations before this
+   * then looks head and marks any more duplicate characters the correct state based on the
+   * max occurances of that character.
+   */
+  static checkCharactersByIndexAndHandleDuplicates({
+    stopCount,
+    submitted,
+    needle,
+    row,
+    positionInSubmitted,
+  }: {
+    stopCount: number;
+    positionInSubmitted: number;
+    submitted: string[];
+    needle: string;
+    row: Row;
+  }): Row {
+    const currentRow = row;
+
+    let currCount = this.getCountOfCharactersAlreadyViewed({
+      haystack: submitted,
+      needle,
+      stop: positionInSubmitted,
+    });
+
+    submitted.forEach((term, index) => {
+      if (
+        term === needle &&
+        currentRow[index].guessState === GuessSpotState.Empty
+      ) {
+        if (currCount < stopCount) {
+          currentRow[index] = this.setSquareGuess({
+            square: currentRow[index],
+            guess: GuessSpotState.ValueOnly,
+          });
+          currCount += 1;
+        } else {
+          currentRow[index] = this.setSquareGuess({
+            square: currentRow[index],
+            guess: GuessSpotState.Wrong,
+          });
+        }
+      }
+    });
+    return currentRow;
+  }
+
+  /**
    * Method used when an individual term does not match completely in the
    * expression. We want to break down the terms by individual character and
    * see if they match in the answer.
@@ -251,38 +300,20 @@ export class Mathler {
             guess: GuessSpotState.Correct,
           });
         } else {
-          const ansCount = answerBreakdown[submittedCharacter];
-          if (typeof ansCount === 'undefined') {
+          const maxCountForCharacter = answerBreakdown[submittedCharacter];
+          if (typeof maxCountForCharacter === 'undefined') {
+            // not in dictionary so its wrong.
             currentRow[i] = this.setSquareGuess({
               square: currentRow[i],
               guess: GuessSpotState.Wrong,
             });
           } else {
-            let currCount = this.getCountOfCharactersAlreadyViewed({
-              haystack: submittedArr,
+            this.checkCharactersByIndexAndHandleDuplicates({
               needle: submittedCharacter,
-              stop: i,
-            });
-
-            const stopCount = ansCount;
-            submittedArr.forEach((duplicateTerm, duplicateIndex) => {
-              if (
-                duplicateTerm === submittedCharacter &&
-                currentRow[duplicateIndex].guessState === GuessSpotState.Empty
-              ) {
-                if (currCount < stopCount) {
-                  currentRow[duplicateIndex] = this.setSquareGuess({
-                    square: currentRow[duplicateIndex],
-                    guess: GuessSpotState.ValueOnly,
-                  });
-                  currCount += 1;
-                } else {
-                  currentRow[duplicateIndex] = this.setSquareGuess({
-                    square: currentRow[duplicateIndex],
-                    guess: GuessSpotState.Wrong,
-                  });
-                }
-              }
+              stopCount: maxCountForCharacter,
+              submitted: submittedArr,
+              row: currentRow,
+              positionInSubmitted: i,
             });
           }
         }
