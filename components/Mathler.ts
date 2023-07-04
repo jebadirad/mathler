@@ -331,7 +331,7 @@ export class Mathler {
     const gb = board;
     const row = gb.board[gb.currentIndex];
     const currentRow = gb.currentIndex;
-    if (gb.currentIndex >= 6) {
+    if (gb.currentIndex >= 6 || gb.isGameOver) {
       // check if a gameover board was submitted.
       gb.isGameOver = true;
       return gb;
