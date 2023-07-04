@@ -127,7 +127,7 @@ describe('Mathler tests', () => {
     expect(validated.board[1][4].guessState).toEqual(GuessSpotState.Wrong);
     expect(validated.board[1][5].guessState).toEqual(GuessSpotState.ValueOnly);
 
-    expect(validated.buttonInputs['9']).toEqual(GuessSpotState.ValueOnly);
+    expect(validated.buttonInputs['9']).toEqual(GuessSpotState.Correct);
     expect(validated.buttonInputs['7']).toEqual(GuessSpotState.Wrong);
     expect(validated.buttonInputs['-']).toEqual(GuessSpotState.Correct);
     expect(validated.buttonInputs['3']).toEqual(GuessSpotState.Wrong);
@@ -351,6 +351,64 @@ describe('Mathler tests', () => {
     expect(validated.buttonInputs['3']).toEqual(GuessSpotState.Correct);
     expect(validated.buttonInputs['8']).toEqual(GuessSpotState.Wrong);
     expect(validated.buttonInputs['1']).toEqual(GuessSpotState.Wrong);
+    expect(validated.buttonInputs['/']).toEqual(GuessSpotState.Empty);
+  });
+
+  it('should handle the associative edge case with duplicate numbers', () => {
+    getMockAnswers.mockImplementation(() => ({
+      expression: `11 + 1 + 5`,
+      value: 11 + 1 + 5,
+    }));
+    const gameBoard = configureGameBoard({ rows: 6, columns: 6 });
+
+    const row: Row = [
+      {
+        guessState: GuessSpotState.Empty,
+        value: '1',
+      },
+      {
+        guessState: GuessSpotState.Empty,
+        value: '+',
+      },
+      {
+        guessState: GuessSpotState.Empty,
+        value: '1',
+      },
+      {
+        guessState: GuessSpotState.Empty,
+        value: '5',
+      },
+      {
+        guessState: GuessSpotState.Empty,
+        value: '+',
+      },
+      {
+        guessState: GuessSpotState.Empty,
+        value: '1',
+      },
+    ];
+
+    gameBoard.board[0] = row;
+
+    gameBoard.currentIndex = 0;
+
+    const validated = Mathler.validateGameBoard({ board: gameBoard });
+    expect(validated.currentIndex).toEqual(1);
+    expect(validated.isGameOver).toBeFalsy();
+
+    expect(validated.board[0][0].guessState).toEqual(GuessSpotState.Correct);
+    expect(validated.board[0][1].guessState).toEqual(GuessSpotState.Correct);
+    expect(validated.board[0][2].guessState).toEqual(GuessSpotState.ValueOnly);
+    expect(validated.board[0][3].guessState).toEqual(GuessSpotState.ValueOnly);
+    expect(validated.board[0][4].guessState).toEqual(GuessSpotState.Correct);
+    expect(validated.board[0][5].guessState).toEqual(GuessSpotState.ValueOnly);
+
+    expect(validated.buttonInputs['9']).toEqual(GuessSpotState.Empty);
+    expect(validated.buttonInputs['+']).toEqual(GuessSpotState.Correct);
+    expect(validated.buttonInputs['-']).toEqual(GuessSpotState.Empty);
+    expect(validated.buttonInputs['3']).toEqual(GuessSpotState.Empty);
+    expect(validated.buttonInputs['5']).toEqual(GuessSpotState.Correct);
+    expect(validated.buttonInputs['1']).toEqual(GuessSpotState.Correct);
     expect(validated.buttonInputs['/']).toEqual(GuessSpotState.Empty);
   });
 });

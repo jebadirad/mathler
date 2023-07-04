@@ -72,7 +72,8 @@ export class Mathler {
        * 10 + 15 + 1 will not match
        * [1, 10, 15], [+,+]
        * 1,10,15,+,+
-       *
+       * 1 5 11 + +
+       * 1 1 15 + +
        * 24 * 2 - 9 and 2 * 24 - 9 also works
        * 2 9 24 * -
        */
@@ -84,7 +85,7 @@ export class Mathler {
         .split(operatorRegEx)
         .sort()
         .concat(submittedOperators)
-        .join('');
+        .join(' ');
 
       const answerOperators = answer
         .split('')
@@ -94,7 +95,7 @@ export class Mathler {
         .split(operatorRegEx)
         .sort()
         .concat(answerOperators)
-        .join('');
+        .join(' ');
 
       return submittedValues === answerValues;
     }
@@ -126,21 +127,13 @@ export class Mathler {
   }): GameBoard['buttonInputs'] {
     const answerBreakdown = _.countBy(answer.split(''), (a) => a);
     const submittedBreakdown = _.countBy(submitted.split(''), (a) => a);
-    const currentRow = board.board[board.currentIndex];
     const btns = board.buttonInputs;
     Object.entries(submittedBreakdown).forEach(([key, value]) => {
       if (isValidValue(key)) {
         const ans = answerBreakdown[key];
         if (ans) {
           if (ans === value) {
-            const squares = currentRow.filter((item) => item.value === key);
-            if (
-              _.every(squares, (sq) => sq.guessState === GuessSpotState.Correct)
-            ) {
-              btns[key] = GuessSpotState.Correct;
-            } else {
-              btns[key] = GuessSpotState.ValueOnly;
-            }
+            btns[key] = GuessSpotState.Correct;
           } else {
             btns[key] = GuessSpotState.ValueOnly;
           }
@@ -298,11 +291,13 @@ export class Mathler {
   }): GameBoard {
     const gb = board;
     const row = gb.board[gb.currentIndex];
+    const currentRow = gb.currentIndex;
     if (gb.currentIndex >= 6) {
       // check if a gameover board was submitted.
       gb.isGameOver = true;
       return gb;
     }
+
     const submittedAnswer = row.map((item) => item.value).join('');
     const answer = this.getTodaysAnswers(date);
     const answerExpression = answer.expression.replaceAll(' ', '');
@@ -315,7 +310,7 @@ export class Mathler {
           submitted: submittedAnswer,
         })
       ) {
-        gb.board[gb.currentIndex] = row.map((item) =>
+        gb.board[currentRow] = row.map((item) =>
           this.setSquareGuess({
             square: item,
             guess: GuessSpotState.Correct,
@@ -325,7 +320,7 @@ export class Mathler {
         return gb;
       }
 
-      gb.board[gb.currentIndex] = this.checkTerms({
+      gb.board[currentRow] = this.checkTerms({
         answer: answerExpression,
         submitted: submittedAnswer,
         board,
