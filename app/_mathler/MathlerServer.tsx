@@ -5,7 +5,7 @@ import MathlerContainer from './MathlerContainer';
 async function validateGameBoard(board: GameBoard): Promise<GameBoard> {
   'use server';
 
-  return Mathler.validateGameBoard(board);
+  return Mathler.validateGameBoard({ board });
 }
 
 export default function MathlerServer() {

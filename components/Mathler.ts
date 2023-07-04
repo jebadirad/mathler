@@ -69,13 +69,11 @@ export class Mathler {
        * [11, 10, 5], [+,+]
        * 5,10,11,+,+
        *
-       *
        * 10 + 15 + 1 will not match
        * [1, 10, 15], [+,+]
        * 1,10,15,+,+
        *
        * 24 * 2 - 9 and 2 * 24 - 9 also works
-       *
        * 2 9 24 * -
        */
       const submittedOperators = submitted
@@ -128,13 +126,21 @@ export class Mathler {
   }): GameBoard['buttonInputs'] {
     const answerBreakdown = _.countBy(answer.split(''), (a) => a);
     const submittedBreakdown = _.countBy(submitted.split(''), (a) => a);
+    const currentRow = board.board[board.currentIndex];
     const btns = board.buttonInputs;
     Object.entries(submittedBreakdown).forEach(([key, value]) => {
       if (isValidValue(key)) {
         const ans = answerBreakdown[key];
         if (ans) {
           if (ans === value) {
-            btns[key] = GuessSpotState.Correct;
+            const squares = currentRow.filter((item) => item.value === key);
+            if (
+              _.every(squares, (sq) => sq.guessState === GuessSpotState.Correct)
+            ) {
+              btns[key] = GuessSpotState.Correct;
+            } else {
+              btns[key] = GuessSpotState.ValueOnly;
+            }
           } else {
             btns[key] = GuessSpotState.ValueOnly;
           }
@@ -147,7 +153,25 @@ export class Mathler {
     return btns;
   }
 
-  static checkTerms({
+  static getCountOfCharactersAlreadyViewed({
+    stop,
+    needle,
+    haystack,
+  }: {
+    stop: number;
+    needle: string;
+    haystack: string[];
+  }): number {
+    let currCount = 0;
+    for (let m = 0; m < stop; m += 1) {
+      if (haystack[m] === needle) {
+        currCount += 1;
+      }
+    }
+    return currCount;
+  }
+
+  static checkTermsCompletelyCorrect({
     answer,
     submitted,
     board,
@@ -157,46 +181,80 @@ export class Mathler {
     board: GameBoard;
   }): Row {
     const currentRow = board.board[board.currentIndex];
-    const answerBreakdown = _.countBy(answer.split(''), (a) => a);
+    const answerTerms = answer.split(/(?=[+*-/])|(?<=[+*-/])/g);
+    const submittedTerms = submitted.split(/(?=[+*-/])|(?<=[+*-/])/g);
+    submittedTerms.forEach((term, i, arr) => {
+      if (answerTerms.includes(term)) {
+        const termsParsed = arr.slice(0, i);
+        const lengthOfTerms = termsParsed.join('').length;
+        for (let j = lengthOfTerms; j < lengthOfTerms + term.length; j += 1) {
+          currentRow[j] = this.setSquareGuess({
+            square: currentRow[j],
+            guess: GuessSpotState.Correct,
+          });
+        }
+        const foundAnswer = answerTerms.findIndex((v) => v === term);
+        answerTerms.splice(foundAnswer, 1);
+      }
+    });
 
-    submitted.split('').forEach((t, i, arr) => {
-      if (currentRow[i].guessState === GuessSpotState.Empty) {
-        if (answer[i] === t) {
+    return currentRow;
+  }
+
+  static checkTermsByIndexWithDuplicates({
+    answer,
+    submitted,
+    row,
+  }: {
+    submitted: string;
+    answer: string;
+    row: Row;
+  }): Row {
+    const currentRow = row;
+    const answerBreakdown = _.countBy(answer.split(''), (a) => a);
+    // identifies numbers/symbol in the correct index position
+    submitted.split('').forEach((submittedCharacter, i, submittedArr) => {
+      const currentValue = currentRow[i].value;
+      const answerCharacter = answer[i];
+      if (
+        currentValue &&
+        !isOperator(currentValue) &&
+        currentRow[i].guessState === GuessSpotState.Empty
+      ) {
+        if (answerCharacter === submittedCharacter) {
           currentRow[i] = this.setSquareGuess({
             square: currentRow[i],
             guess: GuessSpotState.Correct,
           });
         } else {
-          const ansCount = answerBreakdown[t];
+          const ansCount = answerBreakdown[submittedCharacter];
           if (typeof ansCount === 'undefined') {
             currentRow[i] = this.setSquareGuess({
               square: currentRow[i],
               guess: GuessSpotState.Wrong,
             });
           } else {
-            let currCount = 0;
-            // set initial
-            for (let m = 0; m <= i; m += 1) {
-              if (arr[m] === t) {
-                currCount += 1;
-              }
-            }
-            const stopCount = ansCount;
+            let currCount = this.getCountOfCharactersAlreadyViewed({
+              haystack: submittedArr,
+              needle: submittedCharacter,
+              stop: i,
+            });
 
-            arr.forEach((duplicateTerm, di) => {
+            const stopCount = ansCount;
+            submittedArr.forEach((duplicateTerm, duplicateIndex) => {
               if (
-                duplicateTerm === t &&
-                currentRow[di].guessState === GuessSpotState.Empty
+                duplicateTerm === submittedCharacter &&
+                currentRow[duplicateIndex].guessState === GuessSpotState.Empty
               ) {
-                if (currCount <= stopCount) {
-                  currentRow[di] = this.setSquareGuess({
-                    square: currentRow[di],
+                if (currCount < stopCount) {
+                  currentRow[duplicateIndex] = this.setSquareGuess({
+                    square: currentRow[duplicateIndex],
                     guess: GuessSpotState.ValueOnly,
                   });
                   currCount += 1;
                 } else {
-                  currentRow[di] = this.setSquareGuess({
-                    square: currentRow[di],
+                  currentRow[duplicateIndex] = this.setSquareGuess({
+                    square: currentRow[duplicateIndex],
                     guess: GuessSpotState.Wrong,
                   });
                 }
@@ -210,7 +268,34 @@ export class Mathler {
     return currentRow;
   }
 
-  static validateGameBoard(board: GameBoard): GameBoard {
+  static checkTerms({
+    answer,
+    submitted,
+    board,
+  }: {
+    submitted: string;
+    answer: string;
+    board: GameBoard;
+  }): Row {
+    let currentRow = board.board[board.currentIndex];
+
+    currentRow = this.checkTermsCompletelyCorrect({ answer, submitted, board });
+    currentRow = this.checkTermsByIndexWithDuplicates({
+      answer,
+      submitted,
+      row: currentRow,
+    });
+
+    return currentRow;
+  }
+
+  static validateGameBoard({
+    board,
+    date = new Date(),
+  }: {
+    board: GameBoard;
+    date?: Date;
+  }): GameBoard {
     const gb = board;
     const row = gb.board[gb.currentIndex];
     if (gb.currentIndex >= 6) {
@@ -219,11 +304,11 @@ export class Mathler {
       return gb;
     }
     const submittedAnswer = row.map((item) => item.value).join('');
-    const answer = Mathler.getTodaysAnswers(new Date());
+    const answer = Mathler.getTodaysAnswers(date);
     const answerExpression = answer.expression.replaceAll(' ', '');
 
     const evaluatedAnswer = Mathler.evaluateAnswer(submittedAnswer);
-    if (evaluatedAnswer.isValid) {
+    if (evaluatedAnswer.isValid && evaluatedAnswer.answer === answer.value) {
       if (
         this.checkForCorrectAnswer({
           answer: answerExpression,
@@ -250,7 +335,9 @@ export class Mathler {
         submitted: submittedAnswer,
         board: gb,
       });
+
       gb.currentIndex += 1;
+
       if (gb.currentIndex >= 6) {
         gb.isGameOver = true;
       }

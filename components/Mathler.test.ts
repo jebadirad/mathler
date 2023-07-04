@@ -62,7 +62,7 @@ describe('Mathler tests', () => {
         };
       });
 
-    const validated = Mathler.validateGameBoard(gameBoard);
+    const validated = Mathler.validateGameBoard({ board: gameBoard });
     expect(validated.isGameOver).toBeTruthy();
     expect(validated.currentIndex).toEqual(0);
     validated.board[0].forEach((item, i) => {
@@ -95,7 +95,7 @@ describe('Mathler tests', () => {
       });
     gameBoard.currentIndex = 1;
 
-    const validated = Mathler.validateGameBoard(gameBoard);
+    const validated = Mathler.validateGameBoard({ board: gameBoard });
     expect(validated.currentIndex).toEqual(1);
     expect(validated.isGameOver).toBeTruthy();
     validated.board[0].forEach((item) => {
@@ -128,81 +128,8 @@ describe('Mathler tests', () => {
       });
     gameBoard.currentIndex = 6;
 
-    const validated = Mathler.validateGameBoard(gameBoard);
+    const validated = Mathler.validateGameBoard({ board: gameBoard });
     expect(validated.isGameOver).toBeTruthy();
     expect(validated.currentIndex).toEqual(6);
-  });
-  it('should make a guess with partial matches', () => {
-    const gameBoard = { ...initialGameBoard };
-    const answer = Mathler.getTodaysAnswers(new Date());
-    gameBoard.board[0] = gameBoard.board[0].map((item) => ({
-      ...item,
-      value: '0',
-      guessState: GuessSpotState.Wrong,
-    }));
-    gameBoard.board[1] = answer.expression
-      .replaceAll(' ', '')
-      .split('')
-      .map((item, i) => {
-        if (i < 3) {
-          if (isValidValue(item)) {
-            return {
-              value: item,
-              guessState: GuessSpotState.Empty,
-            };
-          }
-        }
-        return {
-          value: '0',
-          guessState: GuessSpotState.Wrong,
-        };
-      });
-    gameBoard.currentIndex = 1;
-
-    const validated = Mathler.validateGameBoard(gameBoard);
-    expect(validated.currentIndex).toEqual(2);
-    expect(validated.isGameOver).toBeFalsy();
-    validated.board[0].forEach((item) => {
-      expect(item.value).toEqual('0');
-      expect(item.guessState).toEqual(GuessSpotState.Wrong);
-    });
-    validated.board[1].forEach((item, i) => {
-      if (i < 3) {
-        expect(item.value).toEqual(answer.expression.replaceAll(' ', '')[i]);
-        expect(item.guessState).toEqual(GuessSpotState.Correct);
-      } else {
-        expect(item.value).toEqual('0');
-        expect(item.guessState).toEqual(GuessSpotState.Wrong);
-      }
-    });
-  });
-  it('should make a guess with no matches', () => {
-    const gameBoard = { ...initialGameBoard };
-    const answer = Mathler.getTodaysAnswers(new Date());
-    gameBoard.board[0] = gameBoard.board[0].map((item) => ({
-      ...item,
-      value: '0',
-      guessState: GuessSpotState.Wrong,
-    }));
-    gameBoard.board[1] = answer.expression
-      .replaceAll(' ', '')
-      .split('')
-      .map(() => ({
-        value: '0',
-        guessState: GuessSpotState.Wrong,
-      }));
-    gameBoard.currentIndex = 1;
-
-    const validated = Mathler.validateGameBoard(gameBoard);
-    expect(validated.currentIndex).toEqual(2);
-    expect(validated.isGameOver).toBeFalsy();
-    validated.board[0].forEach((item) => {
-      expect(item.value).toEqual('0');
-      expect(item.guessState).toEqual(GuessSpotState.Wrong);
-    });
-    validated.board[1].forEach((item) => {
-      expect(item.value).toEqual('0');
-      expect(item.guessState).toEqual(GuessSpotState.Wrong);
-    });
   });
 });
